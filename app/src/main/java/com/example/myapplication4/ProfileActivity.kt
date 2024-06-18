@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication4.data.AppDatabase
 import com.example.myapplication4.data.Profile
@@ -19,6 +20,9 @@ class ProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
+
+        // Enable dark mode based on system settings
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
         // Initialize views
         nameEditText = findViewById(R.id.nameEditText)
@@ -55,7 +59,12 @@ class ProfileActivity : AppCompatActivity() {
         val yearOfBirth = yearOfBirthEditText.text.toString().toIntOrNull()
 
         if (yearOfBirth != null) {
-            val profile = Profile(name = name, about = about, yearOfBirth = yearOfBirth)
+            val profile = Profile(
+                name = name,
+                about = about,
+                yearOfBirth = yearOfBirth,
+                lastUpdated = System.currentTimeMillis()
+            )
 
             lifecycleScope.launch {
                 database.profileDao().insert(profile)

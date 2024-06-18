@@ -3,32 +3,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="?attr/colorBackground">
 
     <EditText
         android:id="@+id/nameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/name_hint"/>
+        android:hint="@string/name_hint"
+        android:textColor="?attr/colorOnBackground"/>
 
     <EditText
         android:id="@+id/aboutEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/about_hint"
-        android:inputType="textMultiLine"/>
+        android:inputType="textMultiLine"
+        android:textColor="?attr/colorOnBackground"/>
 
     <EditText
         android:id="@+id/yearOfBirthEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/year_of_birth_hint"
-        android:inputType="number"/>
+        android:inputType="number"
+        android:textColor="?attr/colorOnBackground"/>
 
     <Button
         android:id="@+id/saveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/save"/>
+        android:text="@string/save"
+        android:textColor="?attr/colorOnPrimary"
+        android:background="?attr/colorPrimary"/>
 
 </LinearLayout>
