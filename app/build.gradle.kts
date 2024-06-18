@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    //id("com.google.devtools.ksp") version "1.8.0-1.0.9"
+    kotlin("kapt")
 }
 
 android {
@@ -39,7 +41,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -52,5 +53,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.androidx.room.room.compiler)
+    //implementation("com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9")
+    //ksp("com.example:example-processor:1.0.0")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.kotlinx.coroutines.android)
 }
