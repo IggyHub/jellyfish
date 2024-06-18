@@ -5,8 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Profile::class], version = 1)
+@Database(entities = [Card::class, Profile::class], version = 2) // Incremented version number
 abstract class AppDatabase : RoomDatabase() {
+    abstract fun cardDao(): CardDao
     abstract fun profileDao(): ProfileDao
 
     companion object {
@@ -19,7 +20,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).build()
+                ).fallbackToDestructiveMigration() // This will reset the database if the schema is changed, use with caution
+                    .build()
                 INSTANCE = instance
                 instance
             }

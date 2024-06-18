@@ -7,5 +7,6 @@
     <string name="about_hint">About</string>
     <string name="year_of_birth_hint">Year of Birth</string>
     <string name="save">Save</string>
+    <string name="go_to_profile_screen">Go to Profile Screen</string>
 
 </resources>

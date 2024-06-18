@@ -13,6 +13,11 @@
             android:id="@+id/buttonGoToProfile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Go to Profile Screen" />
+            android:text="@string/go_to_profile_screen" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </LinearLayout>
 </layout>
