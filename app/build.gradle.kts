@@ -1,8 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.devtools.ksp") version  "2.0.0-1.0.21"
-    //kotlin("kapt")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    //id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp") version "2.0.0-1.0.21"
+    //id("androidx.room")
 }
 
 android {
@@ -36,8 +38,12 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
-        viewBinding = true;
-        dataBinding =  true;
+        compose = true
+        viewBinding = true
+        dataBinding = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.0.0"
     }
 }
 
@@ -55,11 +61,16 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.room.runtime)
-    annotationProcessor(libs.androidx.room.room.compiler)
-    //implementation("com.google.devtools.ksp:symbol-processing-api:1.8.0-1.0.9")
-    //ksp("com.example:example-processor:1.0.0")
-    //kapt("androidx.room:room-compiler:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    ksp(libs.androidx.room.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.kotlinx.coroutines.android)
+
+    // Jetpack Compose dependencies
+    implementation("androidx.compose.ui:ui:1.4.0")
+    implementation("androidx.compose.material:material:1.4.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
+    implementation("androidx.activity:activity-compose:1.7.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.4.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
 }

@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+//import com.example.myapplication4.data.Card
 
-@Database(entities = [Card::class, Profile::class], version = 2) // Incremented version number
+@Database(entities = [Card::class, Profile::class], version = 2, exportSchema = false) // Incremented version number
 abstract class AppDatabase : RoomDatabase() {
     abstract fun cardDao(): CardDao
     abstract fun profileDao(): ProfileDao
