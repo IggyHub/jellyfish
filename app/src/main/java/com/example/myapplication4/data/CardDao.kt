@@ -5,10 +5,19 @@ import androidx.room.Insert
 import androidx.room.Query
 
 @Dao
-interface CardDao {
-    @Query("SELECT * FROM cards")
-    suspend fun getAllCards(): List<Card>
-
+interface ColumnDao {
     @Insert
-    suspend fun insert(card: Card)
+    suspend fun insertColumn(column: Column): Long
+
+    @Query("SELECT * FROM columns ORDER BY sortOrder")
+    suspend fun getAllColumns(): List<Column>
+}
+
+@Dao
+interface CardDao {
+    @Insert
+    suspend fun insertCard(card: Card)
+
+    @Query("SELECT * FROM cards WHERE columnId = :columnId ORDER BY sortOrder")
+    suspend fun getCardsForColumn(columnId: Int): List<Card>
 }

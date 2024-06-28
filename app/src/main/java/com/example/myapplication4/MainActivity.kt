@@ -15,8 +15,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.myapplication4.data.AppDatabase
 import com.example.myapplication4.data.Card
+import com.example.myapplication4.data.Column
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: AppDatabase
@@ -27,47 +29,76 @@ class MainActivity : ComponentActivity() {
 
         database = AppDatabase.getDatabase(this)
 
+        runBlocking {
+            initializeDatabase(database)
+        }
+
         setContent {
             MyApp(database)
         }
     }
 }
 
+suspend fun initializeDatabase(database: AppDatabase) {
+    val columnDao = database.columnDao()
+    val cardDao = database.cardDao()
+
+    val columns = listOf(
+        Column(title = "Column 1", description = "Description 1", sortOrder = 1),
+        Column(title = "Column 2", description = "Description 2", sortOrder = 2)
+    )
+
+    columns.forEach { column ->
+        val columnId = columnDao.insertColumn(column).toInt()
+        val cards = listOf(
+            Card(columnId = columnId, title = "Card 1", description = "Description 1", sortOrder = 1),
+            Card(columnId = columnId, title = "Card 2", description = "Description 2", sortOrder = 2)
+        )
+        cards.forEach { card -> cardDao.insertCard(card) }
+    }
+}
+
 @Composable
 fun MyApp(database: AppDatabase) {
-    val list1 = remember { mutableStateListOf<Card>() }
-    val list2 = remember { mutableStateListOf<Card>() }
+    val columns = remember { mutableStateListOf<Column>() }
+    val cards = remember { mutableStateMapOf<Int, List<Card>>() }
 
     LaunchedEffect(Unit) {
-        val cards = database.cardDao().getAllCards()
-        list1.addAll(cards)
-        list2.addAll(cards)
+        val fetchedColumns = database.columnDao().getAllColumns()
+        columns.addAll(fetchedColumns)
+        fetchedColumns.forEach { column ->
+            cards[column.id] = database.cardDao().getCardsForColumn(column.id)
+        }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            ListView(title = "List 1", items = list1, modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.width(16.dp))
-            ListView(title = "List 2", items = list2, modifier = Modifier.weight(1f))
+    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        items(columns.size) { index ->
+            val column = columns[index]
+            ColumnView(column, cards[column.id] ?: emptyList())
         }
     }
 }
 
 @Composable
-fun ListView(title: String, items: List<Card>, modifier: Modifier = Modifier) {
+fun ColumnView(column: Column, cards: List<Card>) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .background(Color.LightGray)
             .padding(8.dp)
+            .fillMaxWidth()
     ) {
-        Text(text = title, style = MaterialTheme.typography.h6)
-        LazyColumn {
-            items(items.size) { index ->
-                Text(
-                    text = items[index].toString(),
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
+        Text(text = column.title, style = MaterialTheme.typography.h6)
+        Text(text = column.description, style = MaterialTheme.typography.body1)
+        Spacer(modifier = Modifier.height(8.dp))
+        cards.forEach { card ->
+            Text(
+                text = card.title,
+                modifier = Modifier.padding(8.dp)
+            )
+            Text(
+                text = card.description,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }
