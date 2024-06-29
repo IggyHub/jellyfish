@@ -137,30 +137,6 @@ fun MyApp(database: AppDatabase) {
 }
 
 @Composable
-fun HomeScreen(database: AppDatabase) {
-    val columns = remember { mutableStateListOf<Column>() }
-    val cards = remember { mutableStateMapOf<Int, List<Card>>() }
-
-    LaunchedEffect(Unit) {
-        val fetchedColumns = database.columnDao().getAllColumns()
-        columns.addAll(fetchedColumns)
-        fetchedColumns.forEach { column ->
-            cards[column.id] = database.cardDao().getCardsForColumn(column.id)
-        }
-    }
-
-    LazyRow(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        items(columns) { column ->
-            ColumnView(database, column, cards[column.id] ?: emptyList())
-        }
-    }
-}
-
-@Composable
 fun DashboardScreen() {
     // Define your Dashboard screen UI here
     Box(modifier = Modifier.fillMaxSize().background(Color.Green)) {
@@ -177,7 +153,7 @@ fun SettingsScreen() {
 }
 
 @Composable
-fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>) {
+fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgroundColor: Color) {
     val expanded = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val columnDao = database.columnDao()
@@ -185,7 +161,7 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>) {
 
     Column(
         modifier = Modifier
-            .background(Color.LightGray)
+            .background(backgroundColor) // Use the provided background color
             .padding(8.dp)
             .width(250.dp) // Adjust the width to be smaller
             .fillMaxHeight() // Ensure column fills the height of the parent
@@ -238,6 +214,37 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>) {
         }
     }
 }
+
+@Composable
+fun HomeScreen(database: AppDatabase) {
+    val columns = remember { mutableStateListOf<Column>() }
+    val cards = remember { mutableStateMapOf<Int, List<Card>>() }
+
+    LaunchedEffect(Unit) {
+        val fetchedColumns = database.columnDao().getAllColumns()
+        columns.addAll(fetchedColumns)
+        fetchedColumns.forEach { column ->
+            cards[column.id] = database.cardDao().getCardsForColumn(column.id)
+        }
+    }
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp) // Add space between columns
+    ) {
+        items(columns) { column ->
+            ColumnView(
+                database = database,
+                column = column,
+                cards = cards[column.id] ?: emptyList(),
+                backgroundColor = Color.LightGray // You can use different colors or random colors
+            )
+        }
+    }
+}
+
 
 
 @Composable
