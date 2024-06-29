@@ -171,7 +171,7 @@ fun ColumnView(
         modifier = Modifier
             .background(backgroundColor)
             .padding(8.dp)
-            .width(250.dp)
+            .width(300.dp) // Adjust the width to take more space
             .fillMaxHeight()
     ) {
         Row(
@@ -277,10 +277,11 @@ fun CardView(card: Card) {
     Column(
         modifier = Modifier
             .padding(8.dp)
-            .background(Color.White)
+            .background(Color.Cyan) // Change the background color here
+            .fillMaxWidth() // Make the card take the full width of its parent
             .padding(8.dp)
     ) {
-        Text(text = card.title)
-        Text(text = card.description)
+        Text(text = card.title, style = MaterialTheme.typography.h6)
+        Text(text = card.description, style = MaterialTheme.typography.body1)
     }
 }
