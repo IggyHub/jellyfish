@@ -13,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import com.example.myapplication4.data.AppDatabase
@@ -23,7 +22,7 @@ import kotlinx.coroutines.runBlocking
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: AppDatabase
@@ -188,14 +187,21 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>) {
         modifier = Modifier
             .background(Color.LightGray)
             .padding(8.dp)
-            .width(300.dp)
+            .width(250.dp) // Adjust the width to be smaller
             .fillMaxHeight() // Ensure column fills the height of the parent
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp), // Add some padding to separate the text from the menu
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically // Center-align items vertically
         ) {
-            Text(text = column.title, style = MaterialTheme.typography.h6)
+            Text(
+                text = column.title,
+                style = MaterialTheme.typography.h6,
+                modifier = Modifier.weight(1f) // Take up remaining space
+            )
             IconButton(onClick = { expanded.value = true }) {
                 Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
             }
@@ -232,6 +238,7 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>) {
         }
     }
 }
+
 
 @Composable
 fun CardView(card: Card) {
