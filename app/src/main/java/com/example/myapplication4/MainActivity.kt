@@ -154,7 +154,14 @@ fun SettingsScreen() {
 }
 
 @Composable
-fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgroundColor: Color) {
+fun ColumnView(
+    database: AppDatabase,
+    column: Column,
+    cards: List<Card>,
+    backgroundColor: Color,
+    onColumnDeleted: () -> Unit,
+    onCardsDeleted: () -> Unit
+) {
     val expanded = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val columnDao = database.columnDao()
@@ -162,22 +169,22 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgro
 
     Column(
         modifier = Modifier
-            .background(backgroundColor) // Use the provided background color
+            .background(backgroundColor)
             .padding(8.dp)
-            .width(250.dp) // Adjust the width to be smaller
-            .fillMaxHeight() // Ensure column fills the height of the parent
+            .width(250.dp)
+            .fillMaxHeight()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp), // Add some padding to separate the text from the menu
+                .padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically // Center-align items vertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = column.title,
                 style = MaterialTheme.typography.h6,
-                modifier = Modifier.weight(1f) // Take up remaining space
+                modifier = Modifier.weight(1f)
             )
             IconButton(onClick = { expanded.value = true }) {
                 Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
@@ -189,7 +196,9 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgro
                 DropdownMenuItem(onClick = {
                     expanded.value = false
                     coroutineScope.launch {
+                        cardDao.deleteCardsByColumn(column.id)
                         columnDao.deleteColumn(column)
+                        onColumnDeleted()
                     }
                 }) {
                     Text("Delete Column")
@@ -198,6 +207,7 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgro
                     expanded.value = false
                     coroutineScope.launch {
                         cardDao.deleteCardsByColumn(column.id)
+                        onCardsDeleted()
                     }
                 }) {
                     Text("Delete All Cards")
@@ -207,7 +217,7 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgro
         Text(text = column.description, style = MaterialTheme.typography.body1)
         Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(
-            modifier = Modifier.fillMaxHeight() // Ensure LazyColumn fills the height of the parent
+            modifier = Modifier.fillMaxHeight()
         ) {
             items(cards) { card ->
                 CardView(card)
@@ -216,35 +226,49 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgro
     }
 }
 
+
 @Composable
 fun HomeScreen(database: AppDatabase) {
     val columns = remember { mutableStateListOf<Column>() }
     val cards = remember { mutableStateMapOf<Int, List<Card>>() }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Function to refresh columns and cards
+    val refreshData = {
+        coroutineScope.launch {
+            val fetchedColumns = database.columnDao().getAllColumns()
+            columns.clear()
+            columns.addAll(fetchedColumns)
+            fetchedColumns.forEach { column ->
+                cards[column.id] = database.cardDao().getCardsForColumn(column.id)
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
-        val fetchedColumns = database.columnDao().getAllColumns()
-        columns.addAll(fetchedColumns)
-        fetchedColumns.forEach { column ->
-            cards[column.id] = database.cardDao().getCardsForColumn(column.id)
-        }
+        refreshData()
     }
 
     LazyRow(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp) // Add space between columns
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(columns) { column ->
             ColumnView(
                 database = database,
                 column = column,
                 cards = cards[column.id] ?: emptyList(),
-                backgroundColor = Color.LightGray // You can use different colors or random colors
+                backgroundColor = Color.LightGray,
+                onColumnDeleted = { refreshData() },
+                onCardsDeleted = { refreshData() }
             )
         }
     }
 }
+
+
 
 
 
