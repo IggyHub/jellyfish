@@ -152,7 +152,6 @@ fun SettingsScreen() {
         Text("Settings Screen", style = MaterialTheme.typography.h4, modifier = Modifier.padding(16.dp))
     }
 }
-
 @Composable
 fun ColumnView(
     database: AppDatabase,
@@ -166,6 +165,8 @@ fun ColumnView(
     val coroutineScope = rememberCoroutineScope()
     val columnDao = database.columnDao()
     val cardDao = database.cardDao()
+
+    val openDialog = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -216,6 +217,14 @@ fun ColumnView(
         }
         Text(text = column.description, style = MaterialTheme.typography.body1)
         Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { openDialog.value = true },
+            modifier = Modifier.fillMaxWidth().padding(8.dp)
+        ) {
+            Text("Add New Card")
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxHeight()
         ) {
@@ -224,8 +233,71 @@ fun ColumnView(
             }
         }
     }
+
+    if (openDialog.value) {
+        AddCardDialog(
+            database = database,
+            columnId = column.id,
+            onDismiss = { openDialog.value = false },
+            onCardAdded = { onCardsDeleted() }
+        )
+    }
 }
 
+@Composable
+fun AddCardDialog(
+    database: AppDatabase,
+    columnId: Int,
+    onDismiss: () -> Unit,
+    onCardAdded: () -> Unit
+) {
+    val title = remember { mutableStateOf("") }
+    val description = remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    val cardDao = database.cardDao()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add New Card") },
+        text = {
+            Column {
+                TextField(
+                    value = title.value,
+                    onValueChange = { title.value = it },
+                    label = { Text("Title") }
+                )
+                TextField(
+                    value = description.value,
+                    onValueChange = { description.value = it },
+                    label = { Text("Description") }
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                coroutineScope.launch {
+                    cardDao.insertCard(
+                        Card(
+                            columnId = columnId,
+                            title = title.value,
+                            description = description.value,
+                            sortOrder = (cardDao.getCardsForColumn(columnId).size + 1)
+                        )
+                    )
+                    onDismiss()
+                    onCardAdded()
+                }
+            }) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
 
 @Composable
 fun HomeScreen(database: AppDatabase) {
