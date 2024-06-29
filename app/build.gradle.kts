@@ -66,11 +66,15 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // Jetpack Compose dependencies
-    implementation("androidx.compose.ui:ui:1.4.0")
-    implementation("androidx.compose.material:material:1.4.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
-    implementation("androidx.activity:activity-compose:1.7.0")
-    implementation("androidx.compose.runtime:runtime-livedata:1.4.0")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.4.0")
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.runtime.livedata)
+    implementation (libs.androidx.navigation.compose)
+    implementation (libs.androidx.lifecycle.runtime.ktx)
+    debugImplementation(libs.androidx.ui.tooling)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+
 }

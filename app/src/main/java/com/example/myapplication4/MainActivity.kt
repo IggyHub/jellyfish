@@ -9,18 +9,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.*
 import com.example.myapplication4.data.AppDatabase
 import com.example.myapplication4.data.Card
 import com.example.myapplication4.data.Column
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private lateinit var database: AppDatabase
@@ -70,6 +73,72 @@ suspend fun initializeDatabase(database: AppDatabase) {
 
 @Composable
 fun MyApp(database: AppDatabase) {
+    val navController = rememberNavController()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "My Application") },
+                navigationIcon = {
+                    val backStackEntry = navController.currentBackStackEntryAsState().value
+                    if (backStackEntry?.destination?.route != "home") {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            BottomNavigation {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+                BottomNavigationItem(
+                    icon = { /* Add Icons here if needed */ },
+                    label = { Text("Home") },
+                    selected = currentDestination?.route == "home",
+                    onClick = {
+                        navController.navigate("home") {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
+                    }
+                )
+                BottomNavigationItem(
+                    icon = { /* Add Icons here if needed */ },
+                    label = { Text("Dashboard") },
+                    selected = currentDestination?.route == "dashboard",
+                    onClick = {
+                        navController.navigate("dashboard") {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
+                    }
+                )
+                BottomNavigationItem(
+                    icon = { /* Add Icons here if needed */ },
+                    label = { Text("Settings") },
+                    selected = currentDestination?.route == "settings",
+                    onClick = {
+                        navController.navigate("settings") {
+                            popUpTo(navController.graph.startDestinationId)
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+        }
+    ) { innerPadding ->
+        NavHost(navController, startDestination = "home", Modifier.padding(innerPadding)) {
+            composable("home") { HomeScreen(database) }
+            composable("dashboard") { DashboardScreen() }
+            composable("settings") { SettingsScreen() }
+        }
+    }
+}
+
+@Composable
+fun HomeScreen(database: AppDatabase) {
     val columns = remember { mutableStateListOf<Column>() }
     val cards = remember { mutableStateMapOf<Int, List<Card>>() }
 
@@ -87,13 +156,34 @@ fun MyApp(database: AppDatabase) {
             .padding(16.dp)
     ) {
         items(columns) { column ->
-            ColumnView(column, cards[column.id] ?: emptyList())
+            ColumnView(database, column, cards[column.id] ?: emptyList())
         }
     }
 }
 
 @Composable
-fun ColumnView(column: Column, cards: List<Card>) {
+fun DashboardScreen() {
+    // Define your Dashboard screen UI here
+    Box(modifier = Modifier.fillMaxSize().background(Color.Green)) {
+        Text("Dashboard Screen", style = MaterialTheme.typography.h4, modifier = Modifier.padding(16.dp))
+    }
+}
+
+@Composable
+fun SettingsScreen() {
+    // Define your Settings screen UI here
+    Box(modifier = Modifier.fillMaxSize().background(Color.Blue)) {
+        Text("Settings Screen", style = MaterialTheme.typography.h4, modifier = Modifier.padding(16.dp))
+    }
+}
+
+@Composable
+fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>) {
+    val expanded = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val columnDao = database.columnDao()
+    val cardDao = database.cardDao()
+
     Column(
         modifier = Modifier
             .background(Color.LightGray)
@@ -101,7 +191,36 @@ fun ColumnView(column: Column, cards: List<Card>) {
             .width(300.dp)
             .fillMaxHeight() // Ensure column fills the height of the parent
     ) {
-        Text(text = column.title, style = MaterialTheme.typography.h6)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = column.title, style = MaterialTheme.typography.h6)
+            IconButton(onClick = { expanded.value = true }) {
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
+            }
+            DropdownMenu(
+                expanded = expanded.value,
+                onDismissRequest = { expanded.value = false }
+            ) {
+                DropdownMenuItem(onClick = {
+                    expanded.value = false
+                    //coroutineScope.launch {
+                    //    columnDao.deleteColumn(column)
+                    //}
+                }) {
+                    Text("Delete Column")
+                }
+                DropdownMenuItem(onClick = {
+                    expanded.value = false
+                    //coroutineScope.launch {
+                    //    cardDao.deleteCardsByColumn(column.id)
+                    //}
+                }) {
+                    Text("Delete All Cards")
+                }
+            }
+        }
         Text(text = column.description, style = MaterialTheme.typography.body1)
         Spacer(modifier = Modifier.height(8.dp))
         LazyColumn(
