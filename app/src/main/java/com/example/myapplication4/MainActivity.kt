@@ -22,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
@@ -187,17 +188,17 @@ fun ColumnView(database: AppDatabase, column: Column, cards: List<Card>, backgro
             ) {
                 DropdownMenuItem(onClick = {
                     expanded.value = false
-                    //coroutineScope.launch {
-                    //    columnDao.deleteColumn(column)
-                    //}
+                    coroutineScope.launch {
+                        columnDao.deleteColumn(column)
+                    }
                 }) {
                     Text("Delete Column")
                 }
                 DropdownMenuItem(onClick = {
                     expanded.value = false
-                    //coroutineScope.launch {
-                    //    cardDao.deleteCardsByColumn(column.id)
-                    //}
+                    coroutineScope.launch {
+                        cardDao.deleteCardsByColumn(column.id)
+                    }
                 }) {
                     Text("Delete All Cards")
                 }
