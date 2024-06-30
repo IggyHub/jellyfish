@@ -75,6 +75,4 @@ dependencies {
     implementation (libs.androidx.lifecycle.runtime.ktx)
     debugImplementation(libs.androidx.ui.tooling)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-
-
 }
